@@ -1,0 +1,456 @@
+#include <iostream>
+#include <string.h>
+#include <stdlib.h>
+#include <random>
+#include <ctime>
+using namespace std;
+
+// Variable Declaration of Game
+bool p1Playing;
+int p1Input, p2Input;
+char playerAction;
+char restartGame;
+
+// Define Player Type for Limited purpose
+enum pType
+{
+	Dangerous, Smart, Rave
+};
+
+// Assign Player to playing condition
+pType u1Player;
+pType u2Player;
+
+// Creating Player Class
+class Player
+{
+	private:
+	  // Variable for Capacity of Healing of Player
+		int healCapMin;
+		int healCapMax;
+	public:
+	  // Variable for Health and Damage of Player
+		int Health;
+		int PlayerDamage;
+
+		void Init(int health, int baseDamage, int minDamage, int maxDamage, int _healCapMin, int _healCapMax)
+		{
+			// Assigning Values to U. defined type
+			Health = health;
+			PlayerDamage = baseDamage;
+			healCapMin = _healCapMin;
+			healCapMax = _healCapMax;
+
+		// Details for Player before Game Starts
+			cout << " Player health is: " << Health << "\n";
+			cout << " Base Damage is: " << PlayerDamage << "\n";
+			cout << " Additional Damage is: " << minDamage << " - " << maxDamage << "\n";
+			cout << " and Healing Capacity is: " << healCapMin << " - " << healCapMax << "\n";
+		}
+
+		virtual void TakeDamage(int damage, int additionalDamage){
+			// Logic for All Base Class for Taking the Damage
+		}
+
+		virtual int GiveAdditionalDamage(){
+			return 0;
+		}
+
+		// Logic for Healing of Player Dangerous
+		void Heal()
+		{
+			if ((u1Player == Dangerous && p1Playing) || (u2Player == Dangerous && !p1Playing))
+			{
+				int randomExtraHeal;
+				srand(time(0));
+			randomExtraHeal = (rand() % (5 - 1 + 1)) + 1;
+				if (randomExtraHeal > 4)
+				{
+					cout << "Wow!!! Dangerous Player using its Special Power" << "\n";
+					cout << "Extra Heal!! by " << GetActivePlayer() << "\n" << "Health Boosted by 40" << "\n";
+					Health += 40;
+					cout << "New Health after Boost is -->" << Health << "\n";
+					return;
+				}
+			}
+
+		// Player Details after one Attack by Enemy
+			cout << GetActivePlayer() << " is Healing" << "\n";
+			int randomHeal;
+			srand(time(0));
+			randomHeal = (rand() % (healCapMax - healCapMin + 1)) + healCapMax;
+			Health += randomHeal;
+			cout << GetActivePlayer() << " is Healed by " << randomHeal << " and Current Health is " << Health << "\n";
+		}
+
+		// Will Check Player is Ready for Action or not
+		string GetActivePlayer(){
+			if (p1Playing)
+				return "Player 1";
+			return "Player 2";
+		}
+
+		// Will Check Enemy is Ready for Action or not
+		string GetActiveOpp(){
+			if (!p1Playing)
+				return "Player 1";
+			return "Player 2";
+		}
+};
+
+// First Type of Player Inherits from Player
+class DangerousPlayer : public Player
+{
+	// Variable declaration for Dangerous Player Characteristics
+	private:
+		int DangPlayerHealth = 250;
+		int DangPlayerDamage = 35;
+		int addDamageMin = 9;
+		int addDamageMax = 25;
+		int healCapMax = 20;
+		int healCapMin = 5;
+
+	public:
+	//Constructor
+		DangerousPlayer()
+		{
+			cout << "Hi!! I am Dangerous Player, Thanks for Selecting me..I will Destroy Each one with My Super Power.." << "\n";
+			// Declare Variable to Initialize Methods
+			Init(DangPlayerHealth, DangPlayerDamage, addDamageMin, addDamageMax, healCapMin, healCapMax);
+		}
+
+	// Logic for Dangerous Player Taking Damage
+		void TakeDamage(int damage, int additionalDamage)
+		{
+			cout << "Dangeous Player Taking Damage!! (" << GetActiveOpp() << ")" << "\n";
+			cout << "Additional Damage Given: " << additionalDamage << "\n";
+
+		// Logic for Critical hit by Active Player who Attacks
+			if (additionalDamage > addDamageMax - 5)
+			{
+				cout << "OMGGG!!! It's Critical Hit By " << GetActivePlayer() << "\n";
+			}
+
+		// Logic for Total Damage taken
+			int totalDamage = damage + additionalDamage;
+
+			cout << "Total Damage Deal by " << GetActivePlayer() << " is: " << totalDamage << "\n";
+
+		// Health after Taken Total Damage
+			Health -= totalDamage;
+			cout << "Health of " << GetActiveOpp() << " after receiving Damage: " << Health << "\n";
+		}
+
+		int GiveAdditionalDamage()
+		{
+			int randomAdditionalDamage;
+			srand(time(0));
+			randomAdditionalDamage = (rand() % (addDamageMax - addDamageMin + 1)) + addDamageMin;
+			return randomAdditionalDamage;
+		}
+};
+
+// Second Type of Player Inehrits from Player Class
+class SmartPlayer : public Player
+{
+	//variable declaration for Player features
+	private:
+		int smartPlayerHealth = 180;
+		int smartPlayerDamage = 30;
+		int addDamageMin = 11;
+		int addDamageMax = 19;
+		int healCapMax = 30;
+		int healCapMin = 10;
+
+	public:
+	// Constructor for Initialize variable
+		SmartPlayer()
+		{
+			cout << "Hi!! I am Smart Player, Thanks for chosen me..I am master in Attacking back and Dogding..Let's Win.." << "\n";
+			Init(smartPlayerHealth, smartPlayerDamage, addDamageMin, addDamageMax, healCapMin, healCapMax);
+		}
+
+		void TakeDamage(int damage, int additionalDamage)
+		{
+			int randomAttackBlocker;
+			srand(time(0));
+		randomAttackBlocker = (rand() % (7 - 1 + 1) + 1);
+			cout << randomAttackBlocker << "\n";
+			if (randomAttackBlocker > 5)
+			{
+				cout << "What a Smart Move!! Smart Player totally Blocked " << GetActivePlayer() << " 's Attack!!.\n Better luck Next Time Buddy!!" << "\n";
+				return;
+			}
+			cout << "Smart Player Taking Damage!! (" << GetActiveOpp() << ")" << "\n";
+			cout << "Additional Damage Given: " << additionalDamage << "\n";
+
+			if (additionalDamage > addDamageMax - 10)
+			{
+				cout << "OMG!! That's a Criticial Hit by " << GetActivePlayer() << "\n";
+			}
+
+			int totalDamage = damage + additionalDamage;
+
+			cout << "Total Damage Delt by " << GetActivePlayer() << " is: " << totalDamage << "\n";
+
+			Health -= totalDamage;
+			cout << "Health of " << GetActiveOpp() << " after receiving damage is: " << Health << "\n";
+		}
+
+		int GiveAdditionalDamage()
+		{
+			int randomAddDamage;
+			srand(time(0));
+			randomAddDamage = (rand() % (addDamageMax - addDamageMin + 1)) + addDamageMin;
+			return randomAddDamage;
+		}
+};
+
+class RavePlayer : public Player
+{
+	private:
+		int ravePlayerHealth = 100;
+		int ravePlayerDamage = 40;
+		int addDamageMin = 8;
+		int addDamageMax = 12;
+		int healCapMax = 15;
+		int healCapMin = 7;
+
+	public:
+	//Constructor for Player Rave Class
+		RavePlayer()
+		{
+			cout << "Hi!! I am Rave Player, Thanks for Choosing me..I have Burning Fire in My Eyes..You Just be Relax & Rest I will handle it on my Way.." << "\n";
+			Init(ravePlayerHealth, ravePlayerDamage, addDamageMin, addDamageMax, healCapMin, healCapMax);
+		}
+
+		void TakeDamage(int damage, int additionalDamage)
+		{
+			cout << "Rave Player Taking Damage!! (" << GetActiveOpp() << ")" << "\n";
+			cout << "Additional Damage Given: " << additionalDamage << "\n";
+
+			if (additionalDamage > addDamageMax - 5)
+			{
+				cout << "OMG!! It's Critical Hit by " << GetActivePlayer() << "\n";
+			}
+
+			int totalDamage = damage + additionalDamage;
+
+			cout << "Total Damage Delt by " << GetActivePlayer() << " is: " << totalDamage << "\n";
+
+			Health -= totalDamage;
+			cout << "Health of " << GetActiveOpp() << "after receiving damage is: " << Health << "\n";
+		}
+
+		int GiveAdditionalDamage()
+		{
+			int randomAddDamage;
+			srand(time(0));
+			randomAddDamage = (rand() % (addDamageMax - addDamageMin + 1)) + addDamageMin;
+
+			return randomAddDamage + 5; // Here High Chances for Critical Hit
+		}
+};
+
+// Rules for the Game before Start
+void Rule()
+{
+	cout << "Welcome to the 2 Player Battle Game.." << "\n";
+	cout << "Rules:" << "\n";
+	cout << "1) Each Player will get only One turn at a time." << "\n";
+	cout << "2) Each Player has Different Damages, Healing, Additional Abilities & SPECIAL POWERS.\nNote: Each Special Power has 20% probability." << "\n";
+	cout << "3) If any one Player's health is below zero (0), it will Die and loose the Game.." << "\n";
+	cout << "4) Each Player will get Two options in it's turn: 1. Either Heal or 2. Attack other Player.." << "\n";
+	cout << "5) Press H to heal or D to damage!!" << "\n";
+
+	cout << "\n\n";
+
+	cout << "There are 3 Types of Player in our Game.." << "\n";
+	cout << "1)Dangerous Player --> High Health, Avg Healing, Low Base Damage, High Additional Damage ..))" << "\n";
+	cout << "  Special Power - Extra Healing(Heal higher than HP!!) \n  Multiple Attack - Can Attack twice at a time.." << "\n\n";
+
+	cout << "2)Smart Player --> Avg Health, High Healing, Avg Base Damage, Avg Additional Damage ..))" << "\n";
+	cout << "  Special Power - Attack Stopper(takes zero Damage sometimes..LOL) \n  Heal + Damage..at a time!!" << "\n\n";
+
+	cout << "3)Rave Player --> Low Health, Very High Healing, High Base Damage, High Additional Damage ..))" << "\n";
+	cout << "  Special Power - Rave (Damage will double when close to Deth!!) \n  High Chances for Extra Hit!!" << "\n";
+}
+
+// Taking Inputs from Both the Player
+void TakeInputs()
+{
+	if (p1Playing){
+		cin >> p1Input;
+	}
+	else{
+		cin >> p2Input;
+	}
+}
+
+// Condition to Change Player from 1 to 2 or 2 to 1
+void SwitchPlayer()
+{
+	p1Playing = !p1Playing;
+}
+
+// Function for Player Action in Game
+void PrePlayerAction(Player* self, Player* opponent)
+{
+	if (playerAction == 'D' || playerAction == 'd')
+	{
+		if ((u1Player == Dangerous && p1Playing) || (u2Player == Dangerous && !p1Playing))
+		{
+			int randomDoubleAttack;
+			srand(time(0));
+			randomDoubleAttack = (rand() % (5 - 1 + 1) + 1);
+			if (randomDoubleAttack > 4) // 40% probability
+			{
+				cout << "Ohh!!! Dangerous Player using Special Power Ability Double Attack !!" << "\n";
+				opponent -> TakeDamage(self -> PlayerDamage, self -> GiveAdditionalDamage());
+				opponent -> TakeDamage(self -> PlayerDamage, self -> GiveAdditionalDamage());
+				return;
+			}
+		}
+		else if ((u1Player == Rave && p1Playing) || (u2Player == Rave && !p1Playing))
+		{
+			if (self -> Health < 70)
+			{
+				cout << "Rave Player activated Speical Power: Will give More Damage when Health will be Low..Be Alert!!!" << "\n";
+				opponent -> TakeDamage(self -> PlayerDamage + 10, self -> GiveAdditionalDamage() + 10);
+				return;
+			}
+		}
+
+		opponent -> TakeDamage(self -> PlayerDamage, self -> GiveAdditionalDamage());
+	}
+
+	else if (playerAction == 'H' || playerAction == 'h')
+	{
+		if ((u1Player == Smart && p1Playing) || (u2Player == Smart && !p1Playing))
+		{
+			int randomHealAttack;
+			srand(time(0));
+			randomHealAttack = (rand() % (5 - 1 + 1) + 1);
+			if (randomHealAttack > 2) // 20% probability
+			{
+				cout << "Hurrah!! Smart !! Smart Player Used Special Power\n Healed Automatic as well as Damage Opponent!!" << "\n";
+				opponent -> TakeDamage(self -> PlayerDamage, self -> GiveAdditionalDamage());
+			}
+		}
+		self -> Heal();
+	}
+
+	else {
+		cout << "Please Give Valid Input!!" << "\n";
+		cin >> playerAction;
+		PrePlayerAction(self, opponent);
+	}
+}
+
+// Main Method Starts from here..
+int main() {
+	Player* p1;
+	Player* p2;
+	p1 = NULL;
+	p2 = NULL;
+
+	cout << "\n";
+	Rule(); // Print Rule First at the Start of Game
+	cout << "\n";
+  	do
+  	{
+		cout << "\n";
+		cout << "Hello!! Player 1 : Select Type of Player that you want to begin Battle with:\nPress 1 for Dangerous Player, 2 for Smart Player & 3 for Rave Player" << "\n";
+
+		p1Playing = true;
+
+		do{
+			TakeInputs();
+			cout << "\n";
+			if (p1Input == 1) {
+				u1Player = Dangerous;
+				p1 = new DangerousPlayer;
+			}
+			else if(p1Input == 2) {
+				u1Player = Smart;
+				p1 = new SmartPlayer;
+			}
+			else if (p1Input == 3) {
+				u1Player = Rave;
+				p1 = new RavePlayer;
+			}
+			else {
+				cout << "Enter Valid Input.. : " << "\n";
+				TakeInputs();
+			}
+		} while (p1Input > 3 || p1Input <= 0);
+		cout << "\n";
+
+		SwitchPlayer(); // Player 2 is Playing
+
+		cout << "\n";
+	// Player 2 Condition and it's Functionality
+		cout << "Hey, Player 2: Select Player apart from Player Selected By Player 1";
+		cout << "\n";
+	// Logic of Player 2
+		do {
+			TakeInputs();
+			if (p2Input > 3 || p2Input <= 0){
+				cout << "Enter Valid Input: " << "\n";
+			}
+			else if (p1Input == p2Input) {
+				cout << "Select Diffrent Player from Player 1..Don't Panic..Don't Spam yourself.." << "\n";
+			}
+
+			else if (p2Input == 1) {
+				u2Player = Dangerous;
+				p2 = new DangerousPlayer;
+			}
+			else if (p2Input == 2) {
+				u2Player = Smart;
+				p2 = new SmartPlayer;
+			}
+			else if (p2Input == 3) {
+				u2Player = Rave;
+				p2 = new RavePlayer;
+			}
+
+		} while (p2Input > 3 || p2Input <= 0 || p1Input == p2Input);
+
+		cout << "\n";
+		SwitchPlayer(); // Player 1 will Play from here
+		cout << "Nice..Get Ready both of You!! Player 1 will go First.." << "\n\n";
+
+		do {
+			cout << "Player 1 Playing: Press D to deal Damage or H to heal yourself" << "\n";
+			cin >> playerAction;
+			PrePlayerAction(p1, p2);
+			SwitchPlayer();
+			cout << "\n";
+			if (p1 -> Health <= 0 || p2 -> Health <= 0) break;
+			cout << "Player 2 Playing: Press D to deal Damage or H to Heal yourself" << "\n";
+			cin >> playerAction;
+			PrePlayerAction(p2, p1);
+			SwitchPlayer();
+			cout << "\n";
+			if (p1 -> Health <= 0 || p2 -> Health <= 0) break;
+		} while (p1 -> Health > 0 && p2 -> Health > 0);
+
+		if (p1 -> Health <= 0){
+			cout << "Player 1 is Dead..";
+			cout << "\n\n";
+			cout << "WoWWW !!! Player 2 Wonnnn.....!!!!";
+			cout << "\n\n";
+		}
+
+		else if (p2 -> Health <= 0) {
+			cout << "Player 2 is Dead..";
+			cout << "\n\n";
+			cout << "Woww!!! Player 1 Wonn...!!";
+			cout << "\n\n";
+		}
+		cout << "Press S to Restart your Game or Anykey to Exit.." << "\n";
+		cin >> restartGame;
+		cout << "\n\n";
+  	} while (restartGame == 's');
+} 
